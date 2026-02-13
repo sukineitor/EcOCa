@@ -252,47 +252,22 @@ const WalletView: React.FC<WalletViewProps> = ({ bills, totalUSD, onCashOut, dev
             <div className="flex justify-between items-center">
               <span className="text-white/60 text-sm">Nivel Actual:</span>
               <span className="text-xl font-black text-white">{Math.floor(bills / 5000) + 1}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-white/60 text-sm">Progreso al Siguiente:</span>
-              <span className="text-xl font-black text-white">{progressPercent.toFixed(0)}%</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-white/60 text-sm">Anuncios Desbloqueados:</span>
-              <span className="text-xl font-black text-white">{Math.floor(bills / 5000) + 1}/17</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="mt-4">
-          <div className="h-2 bg-black/20 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-lime-400 to-emerald-500 transition-all duration-1000" 
-              style={{ width: `${Math.min(100, (bills % 5000) / 50)}%` }} 
-            />
-          </div>
-          <p className="text-center text-white/60 text-xs mt-2">
-            Nivel {Math.floor(bills / 5000) + 1} - {Math.floor(bills / 5000) + 2}
-          </p>
-        </div>
+  </div>
+
+  <SecuritySystem />
+  
+  {success && (
+    <div className="fixed bottom-32 left-6 right-6 z-[110] bg-lime-400 text-black p-5 rounded-2xl shadow-2xl animate-in slide-in-from-bottom-2 duration-500 flex items-center gap-3">
+      <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center">
+        <span className="text-lg">✅</span>
+      </div>
+      <div>
+        <p className="font-black text-sm">¡Pago Exitoso!</p>
+        <p className="text-xs">Tu pago de ${currentUSDValue.toFixed(2)} ha sido enviado a {paypalEmail}</p>
       </div>
     </div>
-
-    <SecuritySystem />
-    
-    {success && (
-      <div className="fixed bottom-32 left-6 right-6 z-[110] bg-lime-400 text-black p-5 rounded-2xl shadow-2xl animate-in slide-in-from-bottom-2 duration-500 flex items-center gap-3">
-        <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center">
-          <span className="text-lg">✅</span>
-        </div>
-        <div>
-          <p className="font-black text-sm">¡Pago Exitoso!</p>
-          <p className="text-xs">Tu pago de ${currentUSDValue.toFixed(2)} ha sido enviado a {paypalEmail}</p>
-        </div>
-      </div>
-    )}
-  </div>
-);
+  )}
+</div>
 };
 
 export default WalletView;
