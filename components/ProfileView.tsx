@@ -54,56 +54,149 @@ const ProfileView: React.FC<ProfileViewProps> = ({ stats }) => {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="bg-white/5 border border-white/5 rounded-[40px] p-8 flex items-center gap-6">
-        <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-lime-400 to-emerald-600 p-1">
-          <div className="w-full h-full rounded-[20px] bg-black flex items-center justify-center overflow-hidden">
-            <img src={user?.photo} alt="Avatar" className="w-full h-full object-cover" />
+    <div className="space-y-6 animate-in fade-in duration-500 max-w-2xl mx-auto">
+      <div className="bg-white/[0.03] border border-white/10 rounded-[32px] p-6 sm:p-8 text-center relative overflow-hidden shadow-2xl">
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-lime-400 rounded-full opacity-20 blur-[80px]"></div>
+        <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-emerald-400 rounded-full opacity-20 blur-[60px]"></div>
+        
+        <div className="relative z-10">
+          <div className="w-16 h-16 bg-lime-400 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <span className="text-2xl">👤</span>
           </div>
-        </div>
-        <div>
-          <h2 className="text-2xl font-black tracking-tight mb-1">{user?.name}</h2>
-          <span className="inline-flex items-center gap-2 px-3 py-1 bg-lime-400/10 rounded-full border border-lime-400/20">
-             <span className="w-1.5 h-1.5 rounded-full bg-lime-400 animate-pulse" />
-             <p className="text-lime-400 text-[9px] font-black uppercase tracking-widest">Cuenta Activa</p>
-          </span>
+          
+          <h3 className="text-2xl font-black text-white mb-2">Mi Perfil</h3>
+          <p className="text-white/60 text-sm">Dispositivo Identificado</p>
+          
+          <div className="bg-black/40 rounded-2xl p-4 mb-6">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-white/60 text-sm">ID del Dispositivo:</span>
+              <span className="text-lime-400 font-mono text-sm">{deviceId}</span>
+            </div>
+            
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-white/60 text-sm">Tipo de Dispositivo:</span>
+              <span className="text-white text-sm">{
+                /Mobile|Android|iPhone|iPad/.test(navigator.userAgent) ? 'Móvil' : 'Escritorio'
+              }</span>
+            </div>
+            
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-white/60 text-sm">Navegador:</span>
+              <span className="text-white text-sm truncate max-w-[150px]">{navigator.userAgent.split(' ')[0]}</span>
+            </div>
+            
+            <button
+              onClick={() => setShowDeviceDetails(!showDeviceDetails)}
+              className="w-full bg-lime-400/10 border border-lime-400/30 text-lime-400 py-2 rounded-xl text-sm font-semibold hover:bg-lime-400/20 transition-colors"
+            >
+              {showDeviceDetails ? 'Ocultar Detalles' : 'Ver Detalles del Dispositivo'}
+            </button>
+          </div>
+
+          {showDeviceDetails && (
+            <div className="mt-4 space-y-2 text-xs text-white/60">
+              <div className="flex justify-between">
+                <span>Sistema Operativo:</span>
+                <span>{navigator.platform}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Resolución Pantalla:</span>
+                <span>{window.screen.width}x{window.screen.height}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Idioma:</span>
+                <span>{navigator.language || 'Desconocido'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Online:</span>
+                <span className={navigator.onLine ? 'Sí' : 'No'}>{navigator.onLine ? 'Sí' : 'No'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Fecha de Registro:</span>
+                <span>{new Date().toLocaleDateString()}</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
-        <div className="bg-white/5 rounded-[32px] p-8 border border-white/5 flex justify-between items-center">
-          <div>
-            <span className="block text-[10px] font-black text-white/30 uppercase mb-2 tracking-widest">Monedas Acumuladas</span>
-            <span className="text-4xl font-black tabular-nums">{stats.coins.toLocaleString()}</span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="bg-white/5 p-6 rounded-[32px] border border-white/10">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-2xl">📊</span>
+            <span className="text-lg font-bold text-white">Estadísticas</span>
           </div>
-          <div className="text-3xl bg-white/5 w-16 h-16 rounded-2xl flex items-center justify-center">🪙</div>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-white/60 text-sm">Monedas Totales:</span>
+              <span className="text-xl font-black text-white">{stats.coins.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-white/60 text-sm">Bills Acumulados:</span>
+              <span className="text-xl font-black text-lime-400">{stats.bills.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-white/60 text-sm">Total Generado:</span>
+              <span className="text-xl font-black text-white">${stats.totalEarnedUSD.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-white/60 text-sm">Anuncios Vistos:</span>
+              <span className="text-xl font-black text-white">{stats.unlockedCount}/17</span>
+            </div>
+          </div>
         </div>
 
-        <div className="bg-white/5 rounded-[32px] p-8 border border-white/5">
-          <span className="block text-[10px] font-black text-white/30 uppercase mb-6 tracking-widest">Estadísticas de Tráfico</span>
-          <div className="space-y-6">
-            <div className="flex justify-between items-end">
-              <span className="text-xs font-black text-white/50 uppercase">Nivel Desbloqueado</span>
-              <span className="text-sm font-black text-lime-400">NIVEL {stats.unlockedCount} / 8</span>
+        <div className="bg-white/5 p-6 rounded-[32px] border border-white/10">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-2xl">🎯</span>
+            <span className="text-lg font-bold text-white">Niveles</span>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-white/60 text-sm">Nivel Actual:</span>
+              <span className="text-xl font-black text-white">{Math.floor(stats.coins / 5000) + 1}</span>
             </div>
-            <div className="flex justify-between items-end">
-              <span className="text-xs font-black text-white/50 uppercase">Calidad de Clicks</span>
-              <span className="text-sm font-black text-emerald-400 uppercase">Excelente</span>
+            <div className="flex justify-between items-center">
+              <span className="text-white/60 text-sm">Progreso al Siguiente:</span>
+              <span className="text-xl font-black text-white">{((stats.coins % 5000) / 50).toFixed(0)}%</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-white/60 text-sm">Anuncios Desbloqueados:</span>
+              <span className="text-xl font-black text-white">{stats.unlockedCount}/17</span>
             </div>
           </div>
+          
+          <div className="mt-4">
+            <div className="h-2 bg-black/20 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-lime-400 to-emerald-500 transition-all duration-1000" 
+                style={{ width: `${Math.min(100, (stats.coins % 5000) / 50)}%` }} 
+              />
+            </div>
+            <p className="text-center text-white/60 text-xs mt-2">
+              Nivel {Math.floor(stats.coins / 5000) + 1} - {Math.floor(stats.coins / 5000) + 2}
+            </p>
+          </div>
         </div>
-
-        <button 
-          onClick={() => setIsLoggedIn(false)}
-          className="w-full py-5 text-rose-500 font-black text-[11px] uppercase tracking-[0.2em] border border-rose-500/10 rounded-3xl bg-rose-500/5 mt-6 transition-all active:scale-95"
-        >
-          Finalizar Sesión
-        </button>
       </div>
-      
-      <p className="text-center text-[9px] text-white/20 font-black uppercase tracking-[0.3em] pb-10">
-        EcoCash Network • Secure Node 0x77
-      </p>
+
+      <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-[32px] p-6 text-center">
+        <div className="flex items-center gap-3 mb-4">
+          <span className="text-2xl">🔐</span>
+          <span className="text-lg font-bold text-white">Seguridad del Dispositivo</span>
+        </div>
+        
+        <div className="space-y-3 text-sm text-white/80">
+          <p className="mb-2">✅ Dispositivo identificado automáticamente</p>
+          <p className="mb-2">✅ Sesión persistente en este equipo</p>
+          <p className="mb-2">✅ Sin necesidad de login manual</p>
+          <p className="mb-2">✅ Protección contra múltiples sesiones</p>
+          <p className="mb-2">✅ Monitoreo de actividad 24/7</p>
+          <p className="mb-2">✅ Identificación única por dispositivo</p>
+        </div>
+      </div>
     </div>
   );
 };

@@ -6,9 +6,10 @@ interface EarnViewProps {
   ads: AdLink[];
   userCoins: number;
   onEarn: (coins: number, bills: number) => void;
+  deviceId: string;
 }
 
-const EarnView: React.FC<EarnViewProps> = ({ ads, userCoins, onEarn }) => {
+const EarnView: React.FC<EarnViewProps> = ({ ads, userCoins, onEarn, deviceId }) => {
   const [viewingAd, setViewingAd] = useState<AdLink | null>(null);
   const [timer, setTimer] = useState(0);
   const [adBlockDetected, setAdBlockDetected] = useState(false);
@@ -30,7 +31,7 @@ const EarnView: React.FC<EarnViewProps> = ({ ads, userCoins, onEarn }) => {
     
     const adWindow = window.open(ad.url, '_blank');
     if (!adWindow) {
-      alert("⚠️ Acción requerida: Debes permitir las ventanas emergentes (pop-ups) para que el anuncio se valide correctamente.");
+      alert(" Acción requerida: Debes permitir las ventanas emergentes (pop-ups) para que el anuncio se valide correctamente.");
       return;
     }
     
@@ -55,7 +56,7 @@ const EarnView: React.FC<EarnViewProps> = ({ ads, userCoins, onEarn }) => {
       {adBlockDetected && (
         <div className="bg-rose-500/20 border border-rose-500/50 p-4 rounded-2xl text-center shadow-lg">
           <p className="text-rose-500 font-black text-[10px] uppercase tracking-widest">
-            🛑 Bloqueador de anuncios activo. Desactívalo para poder ganar.
+            Bloqueador de anuncios activo. Desactívalo para poder ganar.
           </p>
         </div>
       )}
@@ -63,11 +64,11 @@ const EarnView: React.FC<EarnViewProps> = ({ ads, userCoins, onEarn }) => {
       <div className="bg-gradient-to-br from-lime-400 to-emerald-800 rounded-[32px] p-6 sm:p-10 text-black shadow-2xl overflow-hidden relative">
         <div className="absolute top-0 right-0 p-4 opacity-10 text-6xl">💸</div>
         <h2 className="text-3xl sm:text-4xl font-black mb-1 tracking-tighter">Gana con Enlaces</h2>
-        <p className="text-[10px] font-black opacity-60 uppercase mb-8 tracking-wider">Desbloquea mejores anuncios acumulando monedas</p>
+        <p className="text-[10px] font-black opacity-60 uppercase mb-8 tracking-wider">Dispositivo: {deviceId.slice(-8)}</p>
         
         <div className="space-y-3">
           <div className="flex justify-between items-end">
-            <span className="text-[10px] font-black uppercase">Progreso de Nivel</span>
+            <span className="text-[10px] font-black uppercase tracking-wider">Progreso de Nivel</span>
             <span className="text-xs font-black">Nivel {Math.floor(userCoins / 5000) + 1}</span>
           </div>
           <div className="h-3 bg-black/20 rounded-full overflow-hidden border border-black/5">
@@ -89,12 +90,14 @@ const EarnView: React.FC<EarnViewProps> = ({ ads, userCoins, onEarn }) => {
               onClick={() => startViewing(ad)}
               className={`group relative flex flex-col p-6 rounded-3xl transition-all duration-300 border text-left ${
                 isLocked || adBlockDetected
-                  ? 'bg-white/[0.02] border-white/5 opacity-40 grayscale' 
+                  ? 'bg-white/[0.02] border border-white/5 opacity-40 grayscale' 
                   : 'bg-white/5 border-white/10 hover:border-lime-400/30 hover:bg-white/[0.08] active:scale-95'
               }`}
             >
               <div className="flex justify-between items-start mb-4">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-black border border-white/10 shadow-lg shadow-black/40`}>
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-black border border-white/10 shadow-lg shadow-black/40 ${
+                  isLocked || adBlockDetected ? 'grayscale' : ''
+                }`}>
                   {isLocked ? '🔒' : ad.icon}
                 </div>
                 {isLocked && (

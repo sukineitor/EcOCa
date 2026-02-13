@@ -7,11 +7,8 @@ import BottomNav from './components/BottomNav';
 import EarnView from './components/EarnView';
 import WalletView from './components/WalletView';
 import ProfileView from './components/ProfileView';
-import LoginView from './components/LoginView';
 
 const App: React.FC = () => {
-  const [user, setUser] = useState<any>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [stats, setStats] = useState<UserStats>(() => {
     const saved = localStorage.getItem('ecocash_v2_stats');
     return saved ? JSON.parse(saved) : {
@@ -23,37 +20,34 @@ const App: React.FC = () => {
   });
 
   const [activeTab, setActiveTab] = useState<Tab>('earn');
+  const [deviceId, setDeviceId] = useState<string>('');
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('ecocash_user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-      setIsAuthenticated(true);
+    // Generar o obtener ID único del dispositivo
+    let storedDeviceId = localStorage.getItem('ecocash_device_id');
+    if (!storedDeviceId) {
+      // Generar ID único basado en información del dispositivo
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.textBaseline = 'top';
+      ctx.font = '16px Arial';
+      const text = `${navigator.userAgent}${screen.width}${screen.height}`;
+      ctx.fillText(text, 0, 0);
+      const deviceFingerprint = canvas.toDataURL();
+      const hash = btoa(deviceFingerprint).substring(0, 16);
+      const newDeviceId = `device_${hash}_${Date.now()}`;
+      
+      localStorage.setItem('ecocash_device_id', newDeviceId);
+      storedDeviceId = newDeviceId;
     }
+    setDeviceId(storedDeviceId);
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      localStorage.setItem('ecocash_v2_stats', JSON.stringify(stats));
-    }
-  }, [stats, isAuthenticated]);
-
-  const handleLogin = (userData: any) => {
-    setUser(userData);
-    setIsAuthenticated(true);
-    localStorage.setItem('ecocash_user', JSON.stringify(userData));
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem('ecocash_user');
-    localStorage.removeItem('ecocash_v2_stats');
-  };
+    localStorage.setItem('ecocash_v2_stats', JSON.stringify(stats));
+  }, [stats]);
 
   const handleEarn = useCallback((coins: number, bills: number) => {
-    if (!isAuthenticated) return;
-    
     setStats(prev => {
       const newCoins = prev.coins + coins;
       let adjustedBillReward = bills;
@@ -81,38 +75,32 @@ const App: React.FC = () => {
         unlockedCount: newUnlockedCount
       };
     });
-  }, [isAuthenticated]);
+  }, []);
 
   const handleCashOut = useCallback((billsToDebit: number, usdToCredit: number) => {
-    if (!isAuthenticated) return;
-    
     setStats(prev => ({
       ...prev,
       bills: prev.bills - billsToDebit,
       totalEarnedUSD: prev.totalEarnedUSD + usdToCredit
     }));
-  }, [isAuthenticated]);
+  }, []);
 
   const renderContent = () => {
     switch (activeTab) {
       case 'earn':
-        return <EarnView ads={INITIAL_ADS} userCoins={stats.coins} onEarn={handleEarn} />;
+        return <EarnView ads={INITIAL_ADS} userCoins={stats.coins} onEarn={handleEarn} deviceId={deviceId} />;
       case 'wallet':
-        return <WalletView bills={stats.bills} totalUSD={stats.totalEarnedUSD} onCashOut={handleCashOut} />;
+        return <WalletView bills={stats.bills} totalUSD={stats.totalEarnedUSD} onCashOut={handleCashOut} deviceId={deviceId} />;
       case 'profile':
-        return <ProfileView stats={stats} />;
+        return <ProfileView stats={stats} deviceId={deviceId} />;
       default:
-        return <EarnView ads={INITIAL_ADS} userCoins={stats.coins} onEarn={handleEarn} />;
+        return <EarnView ads={INITIAL_ADS} userCoins={stats.coins} onEarn={handleEarn} deviceId={deviceId} />;
     }
   };
 
-  if (!isAuthenticated) {
-    return <LoginView onLogin={handleLogin} />;
-  }
-
   return (
     <div className="flex flex-col min-h-screen bg-black text-white selection:bg-lime-400 selection:text-black">
-      <Header coins={stats.coins} bills={stats.bills} user={user} onLogout={handleLogout} />
+      <Header coins={stats.coins} bills={stats.bills} deviceId={deviceId} />
       <main className="flex-1 overflow-y-auto px-4 pb-28 pt-4 sm:px-8">
         <div className="max-w-4xl mx-auto w-full">
           {renderContent()}
