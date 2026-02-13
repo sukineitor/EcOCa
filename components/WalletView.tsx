@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { BILLS_TO_USD_RATE, MIN_CASH_OUT_BILLS } from '../constants';
+import { BILLS_TO_USD_RATE } from '../constants';
 import PayPalIntegration from './PayPalIntegration';
 import SecuritySystem from './SecuritySystem';
 
@@ -8,18 +7,20 @@ interface WalletViewProps {
   bills: number;
   totalUSD: number;
   onCashOut: (bills: number, usd: number) => void;
+  deviceId: string;
+  userName: string;
 }
 
-const WalletView: React.FC<WalletViewProps> = ({ bills, totalUSD, onCashOut }) => {
+const WalletView: React.FC<WalletViewProps> = ({ bills, totalUSD, onCashOut, deviceId, userName }) => {
   const [processing, setProcessing] = useState(false);
   const [success, setSuccess] = useState(false);
   const [showPayPal, setShowPayPal] = useState(false);
-  const [paypalEmail, setPaypalEmail] = useState('');
   const [emailStep, setEmailStep] = useState<'email' | 'payment'>('email');
+  const [paypalEmail, setPaypalEmail] = useState('');
   
   const currentUSDValue = bills / BILLS_TO_USD_RATE;
-  const canCashOut = bills >= MIN_CASH_OUT_BILLS;
-  const progressPercent = Math.min(100, (bills / MIN_CASH_OUT_BILLS) * 100);
+  const canCashOut = bills >= 10000;
+  const progressPercent = Math.min(100, (bills / 10000) * 100);
 
   const handleWithdraw = () => {
     if (!canCashOut) return;
@@ -46,7 +47,6 @@ const WalletView: React.FC<WalletViewProps> = ({ bills, totalUSD, onCashOut }) =
       setShowPayPal(false);
       setEmailStep('email');
       setPaypalEmail('');
-      setTimeout(() => setSuccess(false), 3000);
     }, 2000);
   };
 
@@ -135,7 +135,7 @@ const WalletView: React.FC<WalletViewProps> = ({ bills, totalUSD, onCashOut }) =
                 </div>
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-sm text-white/60">Email de destino:</span>
-                  <span className="text-sm font-bold text-white">{paypalEmail}</span>
+                  <span className="text-lg font-bold text-white">{paypalEmail}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-white/60">Eco-Bills a canjear:</span>
@@ -151,7 +151,7 @@ const WalletView: React.FC<WalletViewProps> = ({ bills, totalUSD, onCashOut }) =
 
               <button
                 onClick={() => setEmailStep('email')}
-                className="w-full bg-white/5 border border-white/10 text-white/60 py-3 px-6 rounded-xl hover:bg-white/10 transition-colors"
+                className="w-full bg-white/5 border border-white/10 text-white/60 py-3 rounded-xl text-sm font-semibold hover:bg-white/10 transition-colors"
               >
                 Cambiar Email
               </button>
@@ -165,77 +165,135 @@ const WalletView: React.FC<WalletViewProps> = ({ bills, totalUSD, onCashOut }) =
   return (
     <div className="space-y-6 animate-in fade-in duration-500 max-w-2xl mx-auto">
       <div className="bg-white/[0.03] border border-white/10 rounded-[48px] p-8 sm:p-12 text-center relative overflow-hidden shadow-2xl">
-        <div className="absolute -top-10 -right-10 w-40 h-40 bg-lime-400/10 blur-[80px] rounded-full" />
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-lime-400 rounded-full opacity-20 blur-[80px]"></div>
+        <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-emerald-400 rounded-full opacity-20 blur-[60px]"></div>
         
-        <h3 className="text-white/40 font-black uppercase text-[10px] mb-6 tracking-[0.3em]">Balance de Cuenta</h3>
-        <div className="flex flex-col items-center gap-2 mb-10">
-          <span className="text-6xl sm:text-7xl font-black tracking-tighter text-white tabular-nums">
-            ${currentUSDValue.toFixed(4)}
-          </span>
-          <span className="text-lime-400 font-bold uppercase text-[11px] tracking-widest bg-lime-400/10 px-4 py-1 rounded-full">
-            {bills.toLocaleString(undefined, { maximumFractionDigits: 5 })} Eco-Bills
-          </span>
-        </div>
-
-        <div className="bg-black/40 rounded-3xl p-6 border border-white/5 mb-8">
-            <div className="flex justify-between items-center mb-3">
-                <span className="text-[10px] font-black uppercase text-white/40 tracking-wider">Progreso de Retiro</span>
-                <span className="text-[10px] font-black text-lime-400 uppercase">{Math.floor(progressPercent)}%</span>
-            </div>
-            <div className="h-2.5 bg-white/5 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-lime-500 to-emerald-500 transition-all duration-1000" 
-                  style={{ width: `${progressPercent}%` }} 
-                />
-            </div>
-            <p className="text-[9px] text-white/20 mt-4 font-bold uppercase tracking-tight">Sincronizado con la red de pagos PayPal global</p>
-        </div>
-
-        <button
-          disabled={!canCashOut || processing}
-          onClick={handleWithdraw}
-          className={`w-full py-6 rounded-3xl font-black text-lg transition-all transform active:scale-95 shadow-2xl ${
-            canCashOut 
-              ? 'bg-gradient-to-r from-lime-300 to-lime-600 text-black shadow-lime-400/20' 
-              : 'bg-white/5 text-white/10 border border-white/5 cursor-not-allowed'
-          }`}
-        >
-          {processing ? 'Procesando Solicitud...' : 'Retirar a PayPal'}
-        </button>
+        <h3 className="text-3xl sm:text-4xl font-black mb-1 tracking-tighter">Billetera Digital</h3>
+        <p className="text-[10px] font-black opacity-60 uppercase mb-8 tracking-wider">Usuario: {userName} | Dispositivo: {deviceId.slice(-8)}</p>
         
-        {!canCashOut && (
-          <p className="mt-6 text-[10px] text-white/30 uppercase font-black tracking-widest">
-            Mínimo de retiro: $5.00 USD (10,000 Eco-Bills)
-          </p>
-        )}
+        <div className="space-y-3">
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-sm text-white/60">Balance Actual:</span>
+            <span className="text-2xl font-black text-white">{bills.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-sm text-white/60">Valor USD:</span>
+            <span className="text-2xl font-black text-white">${totalUSD.toFixed(2)}</span>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-white/5 p-6 rounded-[32px] border border-white/5 flex flex-col items-center sm:items-start">
-              <span className="text-2xl mb-3">📊</span>
-              <span className="block text-[10px] font-black text-white/40 uppercase mb-1">Total Generado</span>
-              <span className="text-2xl font-black text-white">${totalUSD.toFixed(2)}</span>
-          </div>
-          <div className="bg-white/5 p-6 rounded-[32px] border border-white/5 flex flex-col items-center sm:items-start">
-              <span className="text-2xl mb-3">🔐</span>
-              <span className="block text-[10px] font-black text-white/40 uppercase mb-1">Estado del Nodo</span>
-              <span className="text-2xl font-black text-emerald-400 uppercase tracking-tighter">Protegido</span>
-          </div>
+      <div className="bg-black/40 rounded-2xl p-6 mb-8">
+        <h3 className="text-xl font-black mb-4 text-center">Progreso de Retiro</h3>
+        <div className="h-3 bg-black/20 rounded-full overflow-hidden border border-black/5">
+          <div 
+            className="h-full bg-gradient-to-r from-lime-400 to-emerald-500 transition-all duration-1000" 
+            style={{ width: `${progressPercent}%` }} 
+          />
+        </div>
+        <p className="text-center text-white/60 text-xs mt-2">
+          {progressPercent.toFixed(0)}% completado
+        </p>
       </div>
 
-      <SecuritySystem />
-
-      {success && (
-        <div className="fixed bottom-32 left-6 right-6 z-[110] bg-lime-400 text-black p-5 rounded-3xl flex items-center gap-4 shadow-2xl animate-in slide-in-from-bottom-10">
-          <div className="bg-black/20 w-10 h-10 rounded-full flex items-center justify-center text-xl">✅</div>
-          <div>
-            <p className="font-black text-sm text-black uppercase">¡Pago Exitoso!</p>
-            <p className="text-[10px] font-bold opacity-70 text-black uppercase tracking-tight">Tu pago de ${currentUSDValue.toFixed(2)} ha sido enviado a {paypalEmail}</p>
-          </div>
-        </div>
+      <button
+        disabled={!canCashOut || processing}
+        onClick={handleWithdraw}
+        className={`w-full py-6 rounded-3xl font-black text-lg transition-all transform active:scale-95 shadow-2xl ${
+          canCashOut 
+            ? 'bg-gradient-to-r from-lime-300 to-lime-600 text-white shadow-lime-400/20' 
+            : 'bg-white/5 text-white/10 border border-white/5 cursor-not-allowed'
+        }`}
+      >
+        {processing ? 'Procesando...' : 'Retirar a PayPal'}
+      </button>
+      
+      {!canCashOut && (
+        <p className="mt-6 text-[10px] text-white/30 uppercase font-black tracking-widest">
+          Mínimo de retiro: $5.00 USD (10,000 Eco-Bills)
+        </p>
       )}
     </div>
-  );
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="bg-white/5 p-6 rounded-[32px] border border-white/10">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-2xl">📊</span>
+            <span className="text-lg font-bold text-white">Estadísticas</span>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-white/60 text-sm">Monedas Totales:</span>
+              <span className="text-xl font-black text-white">{bills.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-white/60 text-sm">Eco-Bills Acumulados:</span>
+              <span className="text-xl font-black text-lime-400">{bills.toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-white/60 text-sm">Total Generado:</span>
+              <span className="text-xl font-black text-white">${totalUSD.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-white/60 text-sm">Retiros Realizados:</span>
+              <span className="text-xl font-black text-white">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white/5 p-6 rounded-[32px] border border-white/10">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-2xl">🎯</span>
+            <span className="text-lg font-bold text-white">Niveles</span>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-white/60 text-sm">Nivel Actual:</span>
+              <span className="text-xl font-black text-white">{Math.floor(bills / 5000) + 1}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-white/60 text-sm">Progreso al Siguiente:</span>
+              <span className="text-xl font-black text-white">{progressPercent.toFixed(0)}%</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-white/60 text-sm">Anuncios Desbloqueados:</span>
+              <span className="text-xl font-black text-white">{Math.floor(bills / 5000) + 1}/17</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-4">
+          <div className="h-2 bg-black/20 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-lime-400 to-emerald-500 transition-all duration-1000" 
+              style={{ width: `${Math.min(100, (bills % 5000) / 50)}%` }} 
+            />
+          </div>
+          <p className="text-center text-white/60 text-xs mt-2">
+            Nivel {Math.floor(bills / 5000) + 1} - {Math.floor(bills / 5000) + 2}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <SecuritySystem />
+    
+    {success && (
+      <div className="fixed bottom-32 left-6 right-6 z-[110] bg-lime-400 text-black p-5 rounded-2xl shadow-2xl animate-in slide-in-from-bottom-2 duration-500 flex items-center gap-3">
+        <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center">
+          <span className="text-lg">✅</span>
+        </div>
+        <div>
+          <p className="font-black text-sm">¡Pago Exitoso!</p>
+          <p className="text-xs">Tu pago de ${currentUSDValue.toFixed(2)} ha sido enviado a {paypalEmail}</p>
+        </div>
+      </div>
+    )}
+  </div>
+);
 };
 
 export default WalletView;

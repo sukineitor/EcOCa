@@ -7,9 +7,10 @@ interface EarnViewProps {
   userCoins: number;
   onEarn: (coins: number, bills: number) => void;
   deviceId: string;
+  userName: string;
 }
 
-const EarnView: React.FC<EarnViewProps> = ({ ads, userCoins, onEarn, deviceId }) => {
+const EarnView: React.FC<EarnViewProps> = ({ ads, userCoins, onEarn, deviceId, userName }) => {
   const [viewingAd, setViewingAd] = useState<AdLink | null>(null);
   const [timer, setTimer] = useState(0);
   const [adBlockDetected, setAdBlockDetected] = useState(false);
@@ -64,7 +65,7 @@ const EarnView: React.FC<EarnViewProps> = ({ ads, userCoins, onEarn, deviceId })
       <div className="bg-gradient-to-br from-lime-400 to-emerald-800 rounded-[32px] p-6 sm:p-10 text-black shadow-2xl overflow-hidden relative">
         <div className="absolute top-0 right-0 p-4 opacity-10 text-6xl">💸</div>
         <h2 className="text-3xl sm:text-4xl font-black mb-1 tracking-tighter">Gana con Enlaces</h2>
-        <p className="text-[10px] font-black opacity-60 uppercase mb-8 tracking-wider">Dispositivo: {deviceId.slice(-8)}</p>
+        <p className="text-[10px] font-black opacity-60 uppercase mb-8 tracking-wider">Usuario: {userName} | Dispositivo: {deviceId.slice(-8)}</p>
         
         <div className="space-y-3">
           <div className="flex justify-between items-end">
@@ -91,7 +92,7 @@ const EarnView: React.FC<EarnViewProps> = ({ ads, userCoins, onEarn, deviceId })
               className={`group relative flex flex-col p-6 rounded-3xl transition-all duration-300 border text-left ${
                 isLocked || adBlockDetected
                   ? 'bg-white/[0.02] border border-white/5 opacity-40 grayscale' 
-                  : 'bg-white/5 border-white/10 hover:border-lime-400/30 hover:bg-white/[0.08] active:scale-95'
+                  : 'bg-white/5 border border-white/10 hover:border-lime-400/30 hover:bg-white/[0.08] active:scale-95'
               }`}
             >
               <div className="flex justify-between items-start mb-4">
