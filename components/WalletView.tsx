@@ -165,7 +165,6 @@ const WalletView: React.FC<WalletViewProps> = ({ bills, totalUSD, onCashOut, dev
   return (
     <div className="space-y-6 animate-in fade-in duration-500 max-w-2xl mx-auto">
       <div className="bg-white/[0.03] border border-white/10 rounded-[48px] p-8 sm:p-12 text-center relative overflow-hidden shadow-2xl">
-        <div className="absolute -top-10 -right-10 w-32 h-32 bg-lime-400 rounded-full opacity-20 blur-[80px]"></div>
         <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-emerald-400 rounded-full opacity-20 blur-[60px]"></div>
         
         <h3 className="text-3xl sm:text-4xl font-black mb-1 tracking-tighter">Billetera Digital</h3>
