@@ -65,7 +65,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ stats }) => {
           </div>
           
           <h3 className="text-2xl font-black text-white mb-2">Mi Perfil</h3>
-          <p className="text-white/60 text-sm">Dispositivo Identificado</p>
+          <p className="text-white/60 text-sm">Cuenta Permanente</p>
           
           <div className="bg-black/40 rounded-2xl p-4 mb-6">
             <div className="flex justify-between items-center mb-3">
@@ -189,12 +189,14 @@ const ProfileView: React.FC<ProfileViewProps> = ({ stats }) => {
         </div>
         
         <div className="space-y-3 text-sm text-white/80">
-          <p className="mb-2">✅ Dispositivo identificado automáticamente</p>
-          <p className="mb-2">✅ Sesión persistente en este equipo</p>
+          <p className="mb-2">✅ Dispositivo identificado permanentemente</p>
+          <p className="mb-2">✅ Cuenta persistente en este equipo</p>
+          <p className="mb-2">✅ Datos guardados automáticamente</p>
           <p className="mb-2">✅ Sin necesidad de login manual</p>
           <p className="mb-2">✅ Protección contra múltiples sesiones</p>
           <p className="mb-2">✅ Monitoreo de actividad 24/7</p>
           <p className="mb-2">✅ Identificación única por dispositivo</p>
+          <p className="mb-2">✅ Tus datos se mantienen seguros</p>
         </div>
       </div>
     </div>

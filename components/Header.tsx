@@ -12,7 +12,7 @@ const Header: React.FC<HeaderProps> = ({ coins, bills, deviceId }) => {
       <div className="flex justify-between items-center">
         <div className="flex flex-col">
           <h1 className="text-xl font-bold bg-gradient-to-r from-lime-300 to-white bg-clip-text text-transparent">EcoCash Pro</h1>
-          <span className="text-[10px] text-lime-400 font-medium tracking-widest uppercase">Dispositivo Identificado</span>
+          <span className="text-[10px] text-lime-400 font-medium tracking-widest uppercase">Cuenta Permanente</span>
         </div>
         
         <div className="flex items-center gap-3">

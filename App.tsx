@@ -44,6 +44,7 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // Guardar stats automáticamente cada vez que cambien
     localStorage.setItem('ecocash_v2_stats', JSON.stringify(stats));
   }, [stats]);
 
