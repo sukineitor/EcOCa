@@ -1,9 +1,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 import { UserStats, Tab, AdLink } from './types';
 import { INITIAL_ADS, BILLS_TO_USD_RATE } from './constants';
-import { AuthProvider, useAuth } from './components/AuthProvider';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
 import EarnView from './components/EarnView';
@@ -11,8 +9,9 @@ import WalletView from './components/WalletView';
 import ProfileView from './components/ProfileView';
 import LoginView from './components/LoginView';
 
-const AppContent: React.FC = () => {
-  const { user, isAuthenticated } = useAuth();
+const App: React.FC = () => {
+  const [user, setUser] = useState<any>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [stats, setStats] = useState<UserStats>(() => {
     const saved = localStorage.getItem('ecocash_v2_stats');
     return saved ? JSON.parse(saved) : {
@@ -26,10 +25,31 @@ const AppContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('earn');
 
   useEffect(() => {
+    const savedUser = localStorage.getItem('ecocash_user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  useEffect(() => {
     if (isAuthenticated) {
       localStorage.setItem('ecocash_v2_stats', JSON.stringify(stats));
     }
   }, [stats, isAuthenticated]);
+
+  const handleLogin = (userData: any) => {
+    setUser(userData);
+    setIsAuthenticated(true);
+    localStorage.setItem('ecocash_user', JSON.stringify(userData));
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem('ecocash_user');
+    localStorage.removeItem('ecocash_v2_stats');
+  };
 
   const handleEarn = useCallback((coins: number, bills: number) => {
     if (!isAuthenticated) return;
@@ -87,12 +107,12 @@ const AppContent: React.FC = () => {
   };
 
   if (!isAuthenticated) {
-    return <LoginView />;
+    return <LoginView onLogin={handleLogin} />;
   }
 
   return (
     <div className="flex flex-col min-h-screen bg-black text-white selection:bg-lime-400 selection:text-black">
-      <Header coins={stats.coins} bills={stats.bills} user={user} />
+      <Header coins={stats.coins} bills={stats.bills} user={user} onLogout={handleLogout} />
       <main className="flex-1 overflow-y-auto px-4 pb-28 pt-4 sm:px-8">
         <div className="max-w-4xl mx-auto w-full">
           {renderContent()}
@@ -100,16 +120,6 @@ const AppContent: React.FC = () => {
       </main>
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
-  );
-};
-
-const App: React.FC = () => {
-  return (
-    <GoogleOAuthProvider clientId="838585889230-is9f5s4472ho7o07at9nd08e8o3rhoni.apps.googleusercontent.com">
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </GoogleOAuthProvider>
   );
 };
 

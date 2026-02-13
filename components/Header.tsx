@@ -1,23 +1,20 @@
-
 import React from 'react';
 import { User } from '../types';
-import { useAuth } from './AuthProvider';
 
 interface HeaderProps {
   coins: number;
   bills: number;
   user?: User | null;
+  onLogout: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ coins, bills, user }) => {
-  const { logout } = useAuth();
-
+const Header: React.FC<HeaderProps> = ({ coins, bills, user, onLogout }) => {
   return (
     <header className="sticky top-0 z-50 ios-blur bg-black/60 border-b border-white/10 px-6 py-4">
       <div className="flex justify-between items-center">
         <div className="flex flex-col">
           <h1 className="text-xl font-bold bg-gradient-to-r from-lime-300 to-white bg-clip-text text-transparent">EcoCash Pro</h1>
-          <span className="text-[10px] text-lime-400 font-medium tracking-widest uppercase">Cuenta Verificada</span>
+          <span className="text-[10px] text-lime-400 font-medium tracking-widest uppercase">Cuenta Activa</span>
         </div>
         
         <div className="flex items-center gap-3">
@@ -49,17 +46,15 @@ const Header: React.FC<HeaderProps> = ({ coins, bills, user }) => {
                   <div className="space-y-1 text-xs">
                     <div className="flex justify-between">
                       <span className="text-white/40">Verificado:</span>
-                      <span className={user.verified_email ? "text-lime-400" : "text-red-400"}>
-                        {user.verified_email ? "✅ Sí" : "❌ No"}
-                      </span>
+                      <span className="text-lime-400">✅ Activo</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-white/40">ID Sesión:</span>
-                      <span className="text-white/60 font-mono text-[10px]">{user.sessionId.slice(-6)}</span>
+                      <span className="text-white/60 font-mono">{user.sessionId.slice(-6)}</span>
                     </div>
                   </div>
                   <button
-                    onClick={logout}
+                    onClick={onLogout}
                     className="w-full mt-3 bg-red-500/10 border border-red-500/30 text-red-400 py-2 rounded-xl text-xs font-semibold hover:bg-red-500/20 transition-colors"
                   >
                     Cerrar Sesión
