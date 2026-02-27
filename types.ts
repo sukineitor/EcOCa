@@ -31,4 +31,4 @@ export interface UserStats {
   unlockedCount: number;
 }
 
-export type Tab = 'earn' | 'wallet' | 'profile';
+export type Tab = 'earn' | 'wallet';
