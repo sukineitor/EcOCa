@@ -1,6 +1,4 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { googleLogout, useGoogleLogin } from '@react-oauth/google';
-import { GOOGLE_CONFIG } from '../config/google';
 import { User } from '../types';
 
 interface AuthContextType {
@@ -21,11 +19,15 @@ export const useAuth = () => {
   return context;
 };
 
-interface AuthProviderProps {
-  children: React.ReactNode;
-}
+const generateSessionId = () => Math.random().toString(36).substring(2, 15);
+const getUserAgentHash = () => navigator.userAgent.substring(0, 50);
+const getIPHash = async () => 'dev_ip_hash';
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+const logSecurityEvent = (event: string, data: any) => {
+  console.log(`[SECURITY] ${event}:`, data);
+};
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -42,107 +44,41 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(false);
   }, []);
 
-  const login = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      try {
-        const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-          headers: {
-            Authorization: `Bearer ${tokenResponse.access_token}`,
-          },
-        });
-        
-        const userInfo = await response.json();
-        
-        const userData: User = {
-          id: userInfo.id,
-          email: userInfo.email,
-          name: userInfo.name,
-          picture: userInfo.picture,
-          verified_email: userInfo.verified_email,
-          locale: userInfo.locale,
-          loginTime: new Date().toISOString(),
-          lastActivity: new Date().toISOString(),
-          sessionId: generateSessionId(),
-          ipHash: await getIPHash(),
-          userAgentHash: getUserAgentHash()
-        };
+  const login = async () => {
+    // Login simulado para desarrollo
+    const mockUser: User = {
+      id: 'dev_user_123',
+      email: 'developer@ecocash.dev',
+      name: 'Developer User',
+      picture: '',
+      verified_email: true,
+      locale: 'es',
+      loginTime: new Date().toISOString(),
+      lastActivity: new Date().toISOString(),
+      sessionId: generateSessionId(),
+      ipHash: await getIPHash(),
+      userAgentHash: getUserAgentHash()
+    };
 
-        setUser(userData);
-        localStorage.setItem('ecocash_user', JSON.stringify(userData));
-        
-        // Log security event
-        logSecurityEvent('LOGIN_SUCCESS', userData);
-        
-      } catch (error) {
-        console.error('Error fetching user info:', error);
-        logSecurityEvent('LOGIN_ERROR', { error: error.message });
-      }
-    },
-    onError: (error) => {
-      console.error('Login Failed:', error);
-      logSecurityEvent('LOGIN_FAILED', { error });
-    },
-    scope: GOOGLE_CONFIG.SCOPE,
-  });
+    setUser(mockUser);
+    localStorage.setItem('ecocash_user', JSON.stringify(mockUser));
+    logSecurityEvent('LOGIN_SUCCESS', mockUser);
+  };
 
   const logout = () => {
     if (user) {
-      logSecurityEvent('LOGOUT', user);
+      logSecurityEvent('LOGOUT', { userId: user.id });
     }
-    googleLogout();
     setUser(null);
     localStorage.removeItem('ecocash_user');
     localStorage.removeItem('ecocash_v2_stats');
   };
 
-  const generateSessionId = (): string => {
-    return 'session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
-  };
+  const isAuthenticated = !!user;
 
-  const getIPHash = async (): Promise<string> => {
-    try {
-      const response = await fetch('https://api.ipify.org?format=json');
-      const data = await response.json();
-      return btoa(data.ip).substring(0, 16);
-    } catch {
-      return 'unknown_ip';
-    }
-  };
-
-  const getUserAgentHash = (): string => {
-    return btoa(navigator.userAgent.substring(0, 100)).substring(0, 16);
-  };
-
-  const logSecurityEvent = (eventType: string, data: any) => {
-    const securityLog = {
-      timestamp: new Date().toISOString(),
-      eventType,
-      data,
-      sessionId: user?.sessionId || 'unknown'
-    };
-    
-    // In production, send to security monitoring service
-    console.log('Security Event:', securityLog);
-    
-    // Store critical events locally
-    const existingLogs = JSON.parse(localStorage.getItem('ecocash_security_logs') || '[]');
-    existingLogs.push(securityLog);
-    
-    // Keep only last 100 events
-    if (existingLogs.length > 100) {
-      existingLogs.splice(0, existingLogs.length - 100);
-    }
-    
-    localStorage.setItem('ecocash_security_logs', JSON.stringify(existingLogs));
-  };
-
-  const value: AuthContextType = {
-    user,
-    login: () => login(),
-    logout,
-    isLoading,
-    isAuthenticated: !!user,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, login, logout, isLoading, isAuthenticated }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
