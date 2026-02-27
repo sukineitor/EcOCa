@@ -8,7 +8,6 @@ import Header from './components/Header';
 import BottomNav from './components/BottomNav';
 import EarnView from './components/EarnView';
 import WalletView from './components/WalletView';
-import ProfileView from './components/ProfileView';
 import LoginView from './components/LoginView';
 
 const AppContent: React.FC = () => {
@@ -79,8 +78,6 @@ const AppContent: React.FC = () => {
         return <EarnView ads={INITIAL_ADS} userCoins={stats.coins} onEarn={handleEarn} />;
       case 'wallet':
         return <WalletView bills={stats.bills} totalUSD={stats.totalEarnedUSD} onCashOut={handleCashOut} />;
-      case 'profile':
-        return <ProfileView stats={stats} />;
       default:
         return <EarnView ads={INITIAL_ADS} userCoins={stats.coins} onEarn={handleEarn} />;
     }
