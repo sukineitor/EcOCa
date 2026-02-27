@@ -1,14 +1,17 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { UserStats, Tab, AdLink } from './types';
 import { INITIAL_ADS, BILLS_TO_USD_RATE } from './constants';
+import { AuthProvider, useAuth } from './components/AuthProvider';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
 import EarnView from './components/EarnView';
 import WalletView from './components/WalletView';
-import ProfileView from './components/ProfileView';
+import LoginView from './components/LoginView';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const { user, isAuthenticated } = useAuth();
   const [stats, setStats] = useState<UserStats>(() => {
     const saved = localStorage.getItem('ecocash_v2_stats');
     return saved ? JSON.parse(saved) : {
@@ -20,50 +23,16 @@ const App: React.FC = () => {
   });
 
   const [activeTab, setActiveTab] = useState<Tab>('earn');
-  const [deviceId, setDeviceId] = useState<string>('');
-  const [userName, setUserName] = useState<string>('');
 
   useEffect(() => {
-    // Generar o obtener ID único del dispositivo
-    let storedDeviceId = localStorage.getItem('ecocash_device_id');
-    let storedUserName = localStorage.getItem('ecocash_user_name');
-    
-    if (!storedDeviceId) {
-      // Generar ID único basado en información del dispositivo
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      ctx.textBaseline = 'top';
-      ctx.font = '16px Arial';
-      const text = `${navigator.userAgent}${screen.width}${screen.height}`;
-      ctx.fillText(text, 0, 0);
-      const deviceFingerprint = canvas.toDataURL();
-      const hash = btoa(deviceFingerprint).substring(0, 16);
-      const newDeviceId = `device_${hash}_${Date.now()}`;
-      
-      localStorage.setItem('ecocash_device_id', newDeviceId);
-      storedDeviceId = newDeviceId;
+    if (isAuthenticated) {
+      localStorage.setItem('ecocash_v2_stats', JSON.stringify(stats));
     }
-    
-    if (!storedUserName) {
-      // Generar nombre de usuario aleatorio la primera vez
-      const randomNames = ['Alex', 'Maria', 'Carlos', 'Sofia', 'Luis', 'Ana', 'Diego', 'Laura', 'Miguel', 'Elena', 'Pedro'];
-      const randomName = randomNames[Math.floor(Math.random() * randomNames.length)];
-      const generatedUserName = `${randomName}${Math.floor(Math.random() * 1000)}`;
-      
-      localStorage.setItem('ecocash_user_name', generatedUserName);
-      storedUserName = generatedUserName;
-    }
-    
-    setDeviceId(storedDeviceId);
-    setUserName(storedUserName);
-  }, []);
-
-  useEffect(() => {
-    // Guardar stats automáticamente cada vez que cambien
-    localStorage.setItem('ecocash_v2_stats', JSON.stringify(stats));
-  }, [stats]);
+  }, [stats, isAuthenticated]);
 
   const handleEarn = useCallback((coins: number, bills: number) => {
+    if (!isAuthenticated) return;
+    
     setStats(prev => {
       const newCoins = prev.coins + coins;
       let adjustedBillReward = bills;
@@ -91,32 +60,36 @@ const App: React.FC = () => {
         unlockedCount: newUnlockedCount
       };
     });
-  }, []);
+  }, [isAuthenticated]);
 
   const handleCashOut = useCallback((billsToDebit: number, usdToCredit: number) => {
+    if (!isAuthenticated) return;
+    
     setStats(prev => ({
       ...prev,
       bills: prev.bills - billsToDebit,
       totalEarnedUSD: prev.totalEarnedUSD + usdToCredit
     }));
-  }, []);
+  }, [isAuthenticated]);
 
   const renderContent = () => {
     switch (activeTab) {
       case 'earn':
-        return <EarnView ads={INITIAL_ADS} userCoins={stats.coins} onEarn={handleEarn} deviceId={deviceId} userName={userName} />;
+        return <EarnView ads={INITIAL_ADS} userCoins={stats.coins} onEarn={handleEarn} />;
       case 'wallet':
-        return <WalletView bills={stats.bills} totalUSD={stats.totalEarnedUSD} onCashOut={handleCashOut} deviceId={deviceId} userName={userName} />;
-      case 'profile':
-        return <ProfileView stats={stats} deviceId={deviceId} userName={userName} />;
+        return <WalletView bills={stats.bills} totalUSD={stats.totalEarnedUSD} onCashOut={handleCashOut} />;
       default:
-        return <EarnView ads={INITIAL_ADS} userCoins={stats.coins} onEarn={handleEarn} deviceId={deviceId} userName={userName} />;
+        return <EarnView ads={INITIAL_ADS} userCoins={stats.coins} onEarn={handleEarn} />;
     }
   };
 
+  if (!isAuthenticated) {
+    return <LoginView />;
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-black text-white selection:bg-lime-400 selection:text-black">
-      <Header coins={stats.coins} bills={stats.bills} deviceId={deviceId} userName={userName} />
+      <Header coins={stats.coins} bills={stats.bills} user={user} />
       <main className="flex-1 overflow-y-auto px-4 pb-28 pt-4 sm:px-8">
         <div className="max-w-4xl mx-auto w-full">
           {renderContent()}
@@ -124,6 +97,16 @@ const App: React.FC = () => {
       </main>
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <GoogleOAuthProvider clientId="838585889230-is9f5s4472ho7o07at9nd08e8o3rhoni.apps.googleusercontent.com">
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </GoogleOAuthProvider>
   );
 };
 
