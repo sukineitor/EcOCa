@@ -83,7 +83,7 @@ const WalletView: React.FC<WalletViewProps> = ({ bills, totalUSD, onCashOut, dev
                   <span className="text-sm text-white/60">Monto a retirar:</span>
                   <span className="text-2xl font-black text-lime-400">${currentUSDValue.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mb-4">
                   <span className="text-sm text-white/60">Eco-Bills a canjear:</span>
                   <span className="text-lg font-bold text-white">{bills.toLocaleString()}</span>
                 </div>
@@ -134,12 +134,15 @@ const WalletView: React.FC<WalletViewProps> = ({ bills, totalUSD, onCashOut, dev
                   <span className="text-2xl font-black text-lime-400">${currentUSDValue.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-sm text-white/60">Email de destino:</span>
-                  <span className="text-lg font-bold text-white">{paypalEmail}</span>
-                </div>
-                <div className="flex justify-between items-center">
                   <span className="text-sm text-white/60">Eco-Bills a canjear:</span>
                   <span className="text-lg font-bold text-white">{bills.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div className="bg-black/40 rounded-2xl p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-sm text-white/60">Email de destino:</span>
+                  <span className="text-lg font-bold text-white">{paypalEmail}</span>
                 </div>
               </div>
 
@@ -165,6 +168,7 @@ const WalletView: React.FC<WalletViewProps> = ({ bills, totalUSD, onCashOut, dev
   return (
     <div className="space-y-6 animate-in fade-in duration-500 max-w-2xl mx-auto">
       <div className="bg-white/[0.03] border border-white/10 rounded-[48px] p-8 sm:p-12 text-center relative overflow-hidden shadow-2xl">
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-lime-400 rounded-full opacity-20 blur-[80px]"></div>
         <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-emerald-400 rounded-full opacity-20 blur-[60px]"></div>
         
         <h3 className="text-3xl sm:text-4xl font-black mb-1 tracking-tighter">Billetera Digital</h3>
@@ -180,41 +184,40 @@ const WalletView: React.FC<WalletViewProps> = ({ bills, totalUSD, onCashOut, dev
             <span className="text-2xl font-black text-white">${totalUSD.toFixed(2)}</span>
           </div>
         </div>
-      </div>
 
-      <div className="bg-black/40 rounded-2xl p-6 mb-8">
-        <h3 className="text-xl font-black mb-4 text-center">Progreso de Retiro</h3>
-        <div className="h-3 bg-black/20 rounded-full overflow-hidden border border-black/5">
-          <div 
-            className="h-full bg-gradient-to-r from-lime-400 to-emerald-500 transition-all duration-1000" 
-            style={{ width: `${progressPercent}%` }} 
-          />
+        <div className="bg-black/40 rounded-2xl p-6 mb-8">
+          <h3 className="text-xl font-black mb-4 text-center">Progreso de Retiro</h3>
+          <div className="h-3 bg-black/20 rounded-full overflow-hidden border border-black/5">
+            <div 
+              className="h-full bg-gradient-to-r from-lime-400 to-emerald-500 transition-all duration-1000" 
+              style={{ width: `${progressPercent}%` }} 
+            />
+          </div>
+          <p className="text-center text-white/60 text-xs mt-2">
+            {progressPercent.toFixed(0)}% completado
+          </p>
         </div>
-        <p className="text-center text-white/60 text-xs mt-2">
-          {progressPercent.toFixed(0)}% completado
-        </p>
+
+        <button
+          disabled={!canCashOut || processing}
+          onClick={handleWithdraw}
+          className={`w-full py-6 rounded-3xl font-black text-lg transition-all transform active:scale-95 shadow-2xl ${
+            canCashOut 
+              ? 'bg-gradient-to-r from-lime-300 to-lime-600 text-white shadow-lime-400/20' 
+              : 'bg-white/5 text-white/10 border border-white/5 cursor-not-allowed'
+          }`}
+        >
+          {processing ? 'Procesando...' : 'Retirar a PayPal'}
+        </button>
+        
+        {!canCashOut && (
+          <p className="mt-6 text-[10px] text-white/30 uppercase font-black tracking-widest">
+            Mínimo de retiro: $5.00 USD (10,000 Eco-Bills)
+          </p>
+        )}
       </div>
 
-      <button
-        disabled={!canCashOut || processing}
-        onClick={handleWithdraw}
-        className={`w-full py-6 rounded-3xl font-black text-lg transition-all transform active:scale-95 shadow-2xl ${
-          canCashOut 
-            ? 'bg-gradient-to-r from-lime-300 to-lime-600 text-white shadow-lime-400/20' 
-            : 'bg-white/5 text-white/10 border border-white/5 cursor-not-allowed'
-        }`}
-      >
-        {processing ? 'Procesando...' : 'Retirar a PayPal'}
-      </button>
-      
-      {!canCashOut && (
-        <p className="mt-6 text-[10px] text-white/30 uppercase font-black tracking-widest">
-          Mínimo de retiro: $5.00 USD (10,000 Eco-Bills)
-        </p>
-      )}
-    </div>
-
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-white/5 p-6 rounded-[32px] border border-white/10">
           <div className="flex items-center gap-3 mb-4">
             <span className="text-2xl">📊</span>
@@ -240,13 +243,28 @@ const WalletView: React.FC<WalletViewProps> = ({ bills, totalUSD, onCashOut, dev
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="bg-white/5 p-6 rounded-[32px] border border-white/10">
+        <div className="bg-white/5 p-6 rounded-[32px] border border-white/10">
           <div className="flex items-center gap-3 mb-4">
             <span className="text-2xl">🎯</span>
             <span className="text-lg font-bold text-white">Niveles</span>
           </div>
+          
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-white/60 text-sm">Nivel Actual:</span>
+              <span className="text-xl font-black text-white">{Math.floor(bills / 5000) + 1}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-white/60 text-sm">Progreso al Siguiente:</span>
+              <span className="text-xl font-black text-white">{progressPercent.toFixed(0)}%</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-white/60 text-sm">Anuncios Desbloqueados:</span>
+              <span className="text-xl font-black text-white">{Math.floor(bills / 5000) + 1}/17</span>
+            </div>
+          </div>
+          
           <div className="mt-4">
             <div className="h-2 bg-black/20 rounded-full overflow-hidden">
               <div 
@@ -259,22 +277,23 @@ const WalletView: React.FC<WalletViewProps> = ({ bills, totalUSD, onCashOut, dev
             </p>
           </div>
         </div>
-
-        <SecuritySystem />
-      
-        {success && (
-          <div className="fixed bottom-32 left-6 right-6 z-[110] bg-lime-400 text-black p-5 rounded-2xl shadow-2xl animate-in slide-in-from-bottom-2 duration-500 flex items-center gap-3">
-            <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center">
-              <span className="text-lg">✅</span>
-            </div>
-            <div>
-              <p className="font-black text-sm">¡Pago Exitoso!</p>
-              <p className="text-xs">Tu pago de ${currentUSDValue.toFixed(2)} ha sido enviado a {paypalEmail}</p>
-            </div>
-          </div>
-        )}
       </div>
-    );
-  };
 
-  export default WalletView;
+      <SecuritySystem />
+      
+      {success && (
+        <div className="fixed bottom-32 left-6 right-6 z-[110] bg-lime-400 text-black p-5 rounded-2xl shadow-2xl animate-in slide-in-from-bottom-2 duration-500 flex items-center gap-3">
+          <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center">
+            <span className="text-lg">✅</span>
+          </div>
+          <div>
+            <p className="font-black text-sm">¡Pago Exitoso!</p>
+            <p className="text-xs">Tu pago de ${currentUSDValue.toFixed(2)} ha sido enviado a {paypalEmail}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default WalletView;
